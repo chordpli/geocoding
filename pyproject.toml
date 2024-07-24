@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.11"
 certifi = "^2024.7.4"
 geopy = "^2.4.1"
+ruff = "^0.5.4"
 
 
 [build-system]
