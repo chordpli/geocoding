@@ -9,7 +9,7 @@ from geopy.exc import GeocoderTimedOut
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 
-from by_zipcode.model.model import Location
+from by_zipcode.geopy.model.model import Location
 
 BEVERLY_HILLS_ZIP_CODE = "90210"
 
