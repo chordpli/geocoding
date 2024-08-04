@@ -15,10 +15,14 @@ async def init_locations() -> list[Location]:
         Location("San Francisco, CA", Decimal(37.774929), Decimal(-122.419418)),
     ]
 
-async def call_google_api(postal_code:str):
+
+async def call_google_api(postal_code: str):
+    """
+    주어진 우편번호에 대한 위치 정보를 Google Geocoding API를 호출하여 가져오는 함수입니다.
+
+    기본 api 호출 url : https://maps.googleapis.com/maps/api/geocode/
+    """
     URL = f"https://maps.googleapis.com/maps/api/geocode/json?components=country:US|postal_code:{postal_code}&key={API_KEY}"
-    print("*" * 100)
-    print(URL)
 
     try:
         async with aiohttp.ClientSession() as session:
@@ -30,9 +34,17 @@ async def call_google_api(postal_code:str):
         print(e)
         return None
 
+
 # 거리 계산 함수 google api
 async def calculate_distance(locations: list[Location], target_location: tuple):
+    """
+    주어진 위치 목록과 타겟 위치 간의 거리를 Google Distance Matrix API를 호출하여 계산하는 함수입니다.
+
+    기본 url : https://maps.googleapis.com/maps/api/distancematrix/
+    """
+
     distances = []
+    MILE = "1609.34"
 
     for location in locations:
         URL = f"https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&mode=transit&origins={target_location[0]},{target_location[1]}&destinations={location.latitude},{location.longitude}&region=US&key={API_KEY}"
@@ -41,9 +53,16 @@ async def calculate_distance(locations: list[Location], target_location: tuple):
             async with aiohttp.ClientSession() as session:
                 async with session.get(URL) as response:
                     response = await response.json()
-                    api_result = ApiResult(miles=response["rows"][0]["elements"][0]["distance"]["text"], meter_value=response["rows"][0]["elements"][0]["distance"]["value"])
-                    mile = api_result.meter_value/Decimal('1609.34')
-                    distance = Distance(name=location.name, distance=mile, api_result=api_result)
+                    api_result = ApiResult(
+                        miles=response["rows"][0]["elements"][0]["distance"]["text"],
+                        meter_value=response["rows"][0]["elements"][0]["distance"][
+                            "value"
+                        ],
+                    )
+                    mile = api_result.meter_value / Decimal(MILE)
+                    distance = Distance(
+                        name=location.name, distance=mile, api_result=api_result
+                    )
                     distances.append(distance)
         except Exception as e:
             print(e)
@@ -60,6 +79,7 @@ async def main():
 
     for location in lng_:
         print(f"{location.name}: {location.distance:.2f} miles")
+
 
 if __name__ == "__main__":
     asyncio.run(main())
